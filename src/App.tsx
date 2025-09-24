@@ -9,7 +9,7 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
+import { Tabs, TabList, Tab, TabPanel } from 'react-Tabs';
 import 'react-tabs/style/react-tabs.css';
 
 const HomePage = () => (
@@ -85,6 +85,7 @@ export const App = () => {
   const location = useLocation();
   const isTabsActive = location.pathname.startsWith('/tabs');
   const isHomeActive = location.pathname === '/';
+
   return (
     <>
       <nav className="navbar is-light" data-cy="Nav">
