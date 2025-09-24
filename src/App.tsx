@@ -110,7 +110,6 @@ export const App = () => {
           </div>
         </div>
       </nav>
-
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
