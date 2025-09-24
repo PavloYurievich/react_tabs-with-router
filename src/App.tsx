@@ -8,6 +8,7 @@ import {
   Link,
   useLocation,
   useParams,
+  useNavigate, // Додано useNavigate
 } from 'react-router-dom';
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
@@ -24,6 +25,7 @@ const HomePage = () => (
 
 const TabsPage = () => {
   const { tabId } = useParams<{ tabId?: string }>();
+  const navigate = useNavigate(); // Ініціалізовано useNavigate
 
   const tabs = [
     { id: 'tab-1', title: 'Tab 1', content: 'Some text 1' },
@@ -35,6 +37,14 @@ const TabsPage = () => {
   const isTabSelected = selectedIndex !== -1;
   const safeSelectedIndex = isTabSelected ? selectedIndex : undefined;
 
+  const handleTabSelect = index => {
+    const selectedTab = tabs[index];
+
+    if (selectedTab) {
+      navigate(`/tabs/${selectedTab.id}`);
+    }
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -42,27 +52,33 @@ const TabsPage = () => {
           Tabs page
         </h1>
 
-        {/* Завжди рендеримо Tabs, щоб були <Tab> елементи */}
         <Tabs
           selectedIndex={safeSelectedIndex}
           selectedTabClassName="is-active"
           focusTabOnClick={false}
           data-cy="Tabs"
+          onSelect={handleTabSelect}
         >
           <TabList data-cy="TabList">
             {tabs.map(tab => (
-              <Tab key={tab.id} data-cy="Tab">
-                <Link to={`/tabs/${tab.id}`} data-cy="TabLink">
+              <Tab
+                key={tab.id}
+                data-cy="Tab"
+                className={tab.id === tabId ? 'is-active' : ''}
+              >
+                <Link
+                  to={`/tabs/${tab.id}`}
+                  data-cy="TabLink"
+                  className={tab.id === tabId ? 'is-active' : ''}
+                >
                   {tab.title}
                 </Link>
               </Tab>
             ))}
           </TabList>
 
-          {/* Завжди рендеримо всі TabPanel, бо react-tabs очікує їх */}
           {tabs.map(tab => (
             <TabPanel key={tab.id}>
-              {/* Якщо таб вибраний — показуємо його контент, інакше — нічого */}
               {isTabSelected && tab.id === tabId && (
                 <div data-cy="TabContent">{tab.content}</div>
               )}
@@ -70,7 +86,6 @@ const TabsPage = () => {
           ))}
         </Tabs>
 
-        {/* Якщо жоден таб не вибраний — показуємо "Please select a tab" під табами */}
         {!isTabSelected && <div data-cy="TabContent">Please select a tab</div>}
       </div>
     </div>
