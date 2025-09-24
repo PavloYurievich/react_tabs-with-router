@@ -8,7 +8,7 @@ import {
   Link,
   useLocation,
   useParams,
-  useNavigate, // Додано useNavigate
+  useNavigate,
 } from 'react-router-dom';
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
@@ -25,7 +25,7 @@ const HomePage = () => (
 
 const TabsPage = () => {
   const { tabId } = useParams<{ tabId?: string }>();
-  const navigate = useNavigate(); // Ініціалізовано useNavigate
+  const navigate = useNavigate();
 
   const tabs = [
     { id: 'tab-1', title: 'Tab 1', content: 'Some text 1' },
