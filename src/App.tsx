@@ -9,7 +9,7 @@ import {
   useLocation,
   useParams,
 } from 'react-router-dom';
-import { Tabs, TabList, Tab, TabPanel } from 'react-Tabs';
+import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 
 const HomePage = () => (
@@ -33,6 +33,7 @@ const TabsPage = () => {
 
   const selectedIndex = tabs.findIndex(tab => tab.id === tabId);
   const isTabSelected = selectedIndex !== -1;
+  const safeSelectedIndex = isTabSelected ? selectedIndex : undefined;
 
   return (
     <div className="section">
@@ -40,10 +41,11 @@ const TabsPage = () => {
         <h1 className="title" data-cy="TabsPageTitle">
           Tabs page
         </h1>
+
+        {/* Завжди рендеримо Tabs, щоб були <Tab> елементи */}
         <Tabs
-          selectedIndex={selectedIndex}
-          onSelect={() => {}} // onSelect потрібен, але навігацією керує Link
-          selectedTabClassName="is-active" // Додаємо клас, який очікують тести
+          selectedIndex={safeSelectedIndex}
+          selectedTabClassName="is-active"
           focusTabOnClick={false}
           data-cy="Tabs"
         >
@@ -57,14 +59,18 @@ const TabsPage = () => {
             ))}
           </TabList>
 
-          {isTabSelected &&
-            tabs.map(tab => (
-              <TabPanel key={tab.id}>
+          {/* Завжди рендеримо всі TabPanel, бо react-tabs очікує їх */}
+          {tabs.map(tab => (
+            <TabPanel key={tab.id}>
+              {/* Якщо таб вибраний — показуємо його контент, інакше — нічого */}
+              {isTabSelected && tab.id === tabId && (
                 <div data-cy="TabContent">{tab.content}</div>
-              </TabPanel>
-            ))}
+              )}
+            </TabPanel>
+          ))}
         </Tabs>
 
+        {/* Якщо жоден таб не вибраний — показуємо "Please select a tab" під табами */}
         {!isTabSelected && <div data-cy="TabContent">Please select a tab</div>}
       </div>
     </div>
@@ -83,8 +89,9 @@ const NotFoundPage = () => (
 
 export const App = () => {
   const location = useLocation();
-  const isTabsActive = location.pathname.startsWith('/tabs');
   const isHomeActive = location.pathname === '/';
+  const isTabsActive =
+    location.pathname === '/tabs' || location.pathname.startsWith('/tabs/');
 
   return (
     <>
@@ -110,11 +117,14 @@ export const App = () => {
           </div>
         </div>
       </nav>
+
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
-        <Route path="/tabs" element={<TabsPage />} />
-        <Route path="/tabs/:tabId" element={<TabsPage />} />
+        <Route path="tabs">
+          <Route index element={<TabsPage />} />
+          <Route path=":tabId" element={<TabsPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
