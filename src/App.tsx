@@ -85,7 +85,6 @@ export const App = () => {
   const location = useLocation();
   const isTabsActive = location.pathname.startsWith('/tabs');
   const isHomeActive = location.pathname === '/';
-
   return (
     <>
       <nav className="navbar is-light" data-cy="Nav">
