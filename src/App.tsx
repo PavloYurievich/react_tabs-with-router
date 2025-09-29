@@ -8,10 +8,25 @@ import {
   Link,
   useLocation,
   useParams,
-  useNavigate,
 } from 'react-router-dom';
-import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
+import classNames from 'classnames';
+
+interface Tab {
+  id: string;
+  title: string;
+  content: string;
+}
+
+interface TabLinkItemProps {
+  tab: Tab;
+  selectedTabId: string | undefined;
+}
+
+const tabs: Tab[] = [
+  { id: 'tab-1', title: 'Tab 1', content: 'Some text 1' },
+  { id: 'tab-2', title: 'Tab 2', content: 'Some text 2' },
+  { id: 'tab-3', title: 'Tab 3', content: 'Some text 3' },
+];
 
 const HomePage = () => (
   <div className="section">
@@ -23,27 +38,27 @@ const HomePage = () => (
   </div>
 );
 
+const TabLinkItem = ({ tab, selectedTabId }: TabLinkItemProps) => {
+  return (
+    <li
+      key={tab.id}
+      className={classNames({ 'is-active': selectedTabId === tab.id })}
+      data-cy="Tab"
+    >
+      <Link to={`/tabs/${tab.id}`} data-cy="TabLink">
+        {tab.title}
+      </Link>
+    </li>
+  );
+};
+
 const TabsPage = () => {
-  const { tabId } = useParams<{ tabId?: string }>();
-  const navigate = useNavigate();
+  const { tabId } = useParams<{ tabId: string }>();
+  const selectedTab = tabId ? tabs.find(tab => tab.id === tabId) : undefined;
 
-  const tabs = [
-    { id: 'tab-1', title: 'Tab 1', content: 'Some text 1' },
-    { id: 'tab-2', title: 'Tab 2', content: 'Some text 2' },
-    { id: 'tab-3', title: 'Tab 3', content: 'Some text 3' },
-  ];
-
-  const selectedIndex = tabs.findIndex(tab => tab.id === tabId);
-  const isTabSelected = selectedIndex !== -1;
-  const safeSelectedIndex = isTabSelected ? selectedIndex : undefined;
-
-  const handleTabSelect = index => {
-    const selectedTab = tabs[index];
-
-    if (selectedTab) {
-      navigate(`/tabs/${selectedTab.id}`);
-    }
-  };
+  const contentToDisplay = selectedTab
+    ? selectedTab.content
+    : 'Please select a tab';
 
   return (
     <div className="section">
@@ -52,41 +67,17 @@ const TabsPage = () => {
           Tabs page
         </h1>
 
-        <Tabs
-          selectedIndex={safeSelectedIndex}
-          selectedTabClassName="is-active"
-          focusTabOnClick={false}
-          data-cy="Tabs"
-          onSelect={handleTabSelect}
-        >
-          <TabList data-cy="TabList">
+        <div className="tabs is-boxed">
+          <ul data-cy="TabList">
             {tabs.map(tab => (
-              <Tab
-                key={tab.id}
-                data-cy="Tab"
-                className={tab.id === tabId ? 'is-active' : ''}
-              >
-                <Link
-                  to={`/tabs/${tab.id}`}
-                  data-cy="TabLink"
-                  className={tab.id === tabId ? 'is-active' : ''}
-                >
-                  {tab.title}
-                </Link>
-              </Tab>
+              <TabLinkItem key={tab.id} tab={tab} selectedTabId={tabId} />
             ))}
-          </TabList>
+          </ul>
+        </div>
 
-          {tabs.map(tab => (
-            <TabPanel key={tab.id}>
-              {isTabSelected && tab.id === tabId && (
-                <div data-cy="TabContent">{tab.content}</div>
-              )}
-            </TabPanel>
-          ))}
-        </Tabs>
-
-        {!isTabSelected && <div data-cy="TabContent">Please select a tab</div>}
+        <div className="block" data-cy="TabContent">
+          {contentToDisplay}
+        </div>
       </div>
     </div>
   );
@@ -105,8 +96,10 @@ const NotFoundPage = () => (
 export const App = () => {
   const location = useLocation();
   const isHomeActive = location.pathname === '/';
-  const isTabsActive =
-    location.pathname === '/tabs' || location.pathname.startsWith('/tabs/');
+  const isTabsActive = location.pathname.startsWith('/tabs');
+
+  const getNavLinkClass = (isActive: boolean): string =>
+    classNames('navbar-item', { 'is-active': isActive });
 
   return (
     <>
@@ -116,14 +109,14 @@ export const App = () => {
             <div className="navbar-start">
               <Link
                 to="/"
-                className={`navbar-item ${isHomeActive ? 'is-active' : ''}`}
+                className={getNavLinkClass(isHomeActive)}
                 data-cy="NavLink-Home"
               >
                 Home
               </Link>
               <Link
                 to="/tabs"
-                className={`navbar-item ${isTabsActive ? 'is-active' : ''}`}
+                className={getNavLinkClass(isTabsActive)}
                 data-cy="NavLink-Tabs"
               >
                 Tabs
@@ -132,7 +125,6 @@ export const App = () => {
           </div>
         </div>
       </nav>
-
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/home" element={<Navigate to="/" replace />} />
